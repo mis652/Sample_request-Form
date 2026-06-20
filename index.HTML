@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala Tech — Sample Items Request</title>
+<style>
+  :root {
+    --blue-dark: #0b3d91;
+    --blue-mid: #1f6fd1;
+    --blue-light: #2f9ce8;
+    --bg: #f3f4f6;
+    --card-bg: #ffffff;
+    --border: #e2e5ea;
+    --text: #1f2430;
+    --text-muted: #6b7280;
+    --danger: #d9342b;
+    --danger-dark: #b8281f;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .wrap {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* ---- Header banner ---- */
+  .banner {
+    position: relative;
+    background: #ffffff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    padding: 28px 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .banner::before, .banner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 90px;
+    background: linear-gradient(135deg, var(--blue-light), var(--blue-dark));
+  }
+  .banner::before {
+    left: 0;
+    clip-path: polygon(0 0, 70% 0, 30% 100%, 0 100%);
+  }
+  .banner::after {
+    right: 0;
+    clip-path: polygon(70% 0, 100% 0, 100% 100%, 30% 100%);
+  }
+  .banner h1 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--blue-dark);
+    letter-spacing: 0.5px;
+  }
+  .banner p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    color: #5b7aa8;
+    font-weight: 600;
+  }
+
+  /* ---- Cards ---- */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  label {
+    display: block;
+    font-size: 13.5px;
+    color: #374151;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--blue-mid);
+    box-shadow: 0 0 0 3px rgba(31,111,209,0.12);
+  }
+  input::placeholder { color: #a0a6b1; }
+
+  /* ---- Item card ---- */
+  .item-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .item-card-header label { margin: 0; font-weight: 600; }
+  .remove-btn {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .remove-btn:hover { background: var(--danger-dark); }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ---- Buttons ---- */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px 0;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    margin-bottom: 12px;
+    transition: opacity 0.15s ease;
+  }
+  .btn:hover { opacity: 0.92; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-add { background: var(--blue-light); }
+  .btn-submit { background: var(--blue-dark); }
+
+  .status-msg {
+    text-align: center;
+    font-size: 13.5px;
+    margin-top: -2px;
+    margin-bottom: 14px;
+    min-height: 18px;
+  }
+  .status-msg.error { color: var(--danger); }
+
+  /* ---- Full-screen popup ---- */
+  .popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 1000;
+  }
+  .popup-overlay.active {
+    display: flex;
+  }
+  .popup-box {
+    background: #fff;
+    border-radius: 14px;
+    max-width: 440px;
+    width: 100%;
+    padding: 32px 28px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    animation: popIn 0.2s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .popup-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: #fff4e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #b8860b;
+  }
+  .popup-box h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    color: var(--blue-dark);
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  .popup-box p {
+    margin: 0 0 22px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #374151;
+  }
+  .popup-box button {
+    background: var(--blue-dark);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .popup-box button:hover { opacity: 0.92; }
+
+  @media (max-width: 420px) {
+    .row-2 { grid-template-columns: 1fr; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="banner">
+    <h1>Escala Tech</h1>
+    <p>SAMPLE ITEMS REQUEST REGISTRATION FORM</p>
+  </div>
+
+  <div class="card">
+    <label>Company Name</label>
+    <input type="text" id="companyName" placeholder="e.g. Sharma Enterprises">
+
+    <label>Request By</label>
+    <input type="text" id="requestBy" placeholder="e.g. Rajesh Sharma">
+
+    <label>Expected Return Date</label>
+    <input type="date" id="expectedReturnDate">
+
+    <label>Contact No.</label>
+    <input type="tel" id="contactNo" placeholder="e.g. 9876543210">
+  </div>
+
+  <div id="itemsContainer"></div>
+
+  <button class="btn btn-add" onclick="addItemCard()">+ Add Item</button>
+  <div class="status-msg" id="statusMsg"></div>
+  <button class="btn btn-submit" id="submitBtn" onclick="submitRequest()">Submit Request</button>
+
+</div>
+
+<!-- Full-screen popup shown after successful submit -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-box">
+    <div class="popup-icon">!</div>
+    <h2>Important Note</h2>
+    <p>If the samples are not returned by your specified date, a 15 days grace period will apply. After that, the material will be considered sold and billed to your account.</p>
+    <button onclick="closePopupAndReset()">I Understand</button>
+  </div>
+</div>
+
+<script>
+  // =========================================================
+  // CONFIG — paste your deployed Apps Script Web App URL here
+  // (Deploy > New deployment > Web app > copy the URL it gives you)
+  // =========================================================
+  const API_URL = "https://script.google.com/macros/s/AKfycbz2aH6rrTniMxPiqwMsE53v6vlh4HkXgXYUoBpTg9yLz3jpvwLVX3rSd4Xax-78QLE/exec";
+
+  let itemCount = 0;
+
+  function todayISO() {
+    const d = new Date();
+    return d.toISOString().split("T")[0];
+  }
+
+  function addItemCard(prefillName, prefillQty, prefillRemarks) {
+    itemCount++;
+    const id = itemCount;
+    const div = document.createElement("div");
+    div.className = "item-card";
+    div.id = "item-" + id;
+    div.innerHTML = `
+      <div class="item-card-header">
+        <label>Item Name</label>
+        <button class="remove-btn" onclick="removeItemCard(${id})">Remove</button>
+      </div>
+      <input type="text" id="itemName-${id}" placeholder="e.g. HDMI Cable 10m" value="${prefillName || ''}">
+      <div class="row-2">
+        <div>
+          <label>Qty</label>
+          <input type="number" id="qty-${id}" min="0" value="${prefillQty || ''}">
+        </div>
+        <div>
+          <label>Remarks</label>
+          <input type="text" id="remarks-${id}" value="${prefillRemarks || ''}">
+        </div>
+      </div>
+    `;
+    document.getElementById("itemsContainer").appendChild(div);
+  }
+
+  function removeItemCard(id) {
+    const el = document.getElementById("item-" + id);
+    if (!el) return;
+    const remaining = document.querySelectorAll(".item-card").length;
+    if (remaining <= 1) {
+      showStatus("This request needs at least one item.", "error");
+      return;
+    }
+    el.remove();
+  }
+
+  function showStatus(message, type) {
+    const el = document.getElementById("statusMsg");
+    el.textContent = message;
+    el.className = "status-msg " + (type || "");
+  }
+
+  function setButtonLoading(loading) {
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = loading;
+    btn.textContent = loading ? "Submitting…" : "Submit Request";
+  }
+
+  async function postData(payload) {
+    if (API_URL.indexOf("PASTE_YOUR") === 0) {
+      throw new Error("API_URL is not configured yet. Paste your Apps Script Web App URL in the CONFIG section.");
+    }
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight on Apps Script
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Unknown error from server.");
+    return data;
+  }
+
+  async function submitRequest() {
+    const companyName = document.getElementById("companyName").value.trim();
+    const requestBy = document.getElementById("requestBy").value.trim();
+    const expectedReturnDate = document.getElementById("expectedReturnDate").value;
+    const contactNo = document.getElementById("contactNo").value.trim();
+
+    if (!companyName || !requestBy || !expectedReturnDate || !contactNo) {
+      showStatus("Please fill all fields before submitting.", "error");
+      return;
+    }
+
+    const itemCards = document.querySelectorAll(".item-card");
+    const items = [];
+    for (const card of itemCards) {
+      const id = card.id.split("-")[1];
+      const itemName = document.getElementById("itemName-" + id).value.trim();
+      const qty = document.getElementById("qty-" + id).value;
+      const remarks = document.getElementById("remarks-" + id).value.trim();
+      if (!itemName || !qty) {
+        showStatus("Each item needs a name and quantity.", "error");
+        return;
+      }
+      items.push({ itemName, qty, remarks });
+    }
+
+    setButtonLoading(true);
+    try {
+      await postData({
+        type: "sampleRequest",
+        companyName, requestBy, expectedReturnDate, contactNo, items
+      });
+      showStatus("", "");
+      document.getElementById("popupOverlay").classList.add("active");
+    } catch (err) {
+      showStatus(err.message, "error");
+    } finally {
+      setButtonLoading(false);
+    }
+  }
+
+  function closePopupAndReset() {
+    document.getElementById("popupOverlay").classList.remove("active");
+    resetForm();
+  }
+
+  function resetForm() {
+    document.getElementById("companyName").value = "";
+    document.getElementById("requestBy").value = "";
+    document.getElementById("expectedReturnDate").value = "";
+    document.getElementById("contactNo").value = "";
+    document.getElementById("itemsContainer").innerHTML = "";
+    itemCount = 0;
+    addItemCard();
+  }
+
+  // ---- Init ----
+  addItemCard();
+</script>
+
+</body>
+</html>
